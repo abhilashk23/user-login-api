@@ -27,7 +27,7 @@ const upload = multer({ storage: storage });
 /* Register Path */
 router.post('/register', upload.single('profileImage'), async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, username, email, password } = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'Email already exists' });
@@ -36,6 +36,7 @@ router.post('/register', upload.single('profileImage'), async (req, res) => {
 
     const newUser = new User({
       name,
+      username,
       email,
       password: hashedPassword,
       profileImage: req.file ? req.file.filename : null,
@@ -52,10 +53,10 @@ router.post('/register', upload.single('profileImage'), async (req, res) => {
 /* Login Path */
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const userExists = await User.findOne({ email });
+    const { username, password } = req.body;
+    const userExists = await User.findOne({ username });
     if (!userExists) {
-      return res.status(400).json({ message: 'No such email registered with us' });
+      return res.status(400).json({ message: 'No user found with that username' });
     }
 
     const isPasswordMatch = await bcrypt.compare(password, userExists.password);
@@ -82,5 +83,20 @@ router.post('/verifyToken', async (req, res) => {
     res.status(401).json({ message: 'Token verification failed' });
   }
 });
+
+/* Update profile Image */
+router.post('/updateProfile', upload.single('profileImage'), async (req,res)=> {
+  const token = req.body.token;
+  const profileImage = req.file ? req.file.filename : null;
+  try {
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    const user = await User.findById(decoded.userId).select('-password');
+    user.profileImage = profileImage;
+    await user.save();
+    res.status(200).json({ message: 'Profile image updated successfully' });
+  } catch (error) {
+    res.status(401).json({ message: 'Token verification failed' });
+  }
+})
 
 module.exports = router;
