@@ -131,4 +131,34 @@ router.post('/updateBg', upload.single('bgImage'), async (req, res) => {
   }
 });
 
+/* Removing Bg image */
+router.delete('/removeBg', async (req, res) => {
+  const token = req.body.token;
+  try{
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    const user = await User.findById(decoded.userId).select('-password');
+    user.bgImage = "";
+    await user.save();
+    res.status(200).json({ message: 'Bg image removed successfully' });
+  }
+  catch (error) {
+    res.status(401).json({ message: 'Token verification failed' });
+  }
+});
+
+/* Removing profile image */
+router.delete('/removeProfile', async (req, res) => {
+  const token = req.body.token;
+  try{
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    const user = await User.findById(decoded.userId).select('-password');
+    user.profileImage = "";
+    await user.save();
+    res.status(200).json({ message: 'Profile image removed successfully' });
+  }
+  catch (error) {
+    res.status(401).json({ message: 'Token verification failed' });
+  }
+});
+
 module.exports = router;
