@@ -85,7 +85,7 @@ router.post('/verifyToken', async (req, res) => {
 });
 
 /* Update profile Image */
-router.post('/updateProfile', upload.single('profileImage'), async (req,res)=> {
+router.post('/updateProfile', upload.single('profileImage'), async (req, res) => {
   const token = req.body.token;
   const profileImage = req.file ? req.file.filename : null;
   try {
@@ -97,6 +97,38 @@ router.post('/updateProfile', upload.single('profileImage'), async (req,res)=> {
   } catch (error) {
     res.status(401).json({ message: 'Token verification failed' });
   }
-})
+});
+
+/* Add links */
+router.post('/addLinks', async (req, res) => {
+  const { token, title, url } = req.body;
+  try {
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    const user = await User.findById(decoded.userId).select('-password');
+
+    user.links.push({ title, url });
+    await user.save();
+    res.status(200).json({ message: 'Link added successfully' });
+  }
+  catch (error) {
+    res.status(401).json({ message: 'Token verification failed' });
+  }
+});
+
+/* Update backgroud image */
+router.post('/updateBg', upload.single('bgImage'), async (req, res) => {
+  const token = req.body.token;
+  const bgImage = req.file ? req.file.filename : null;
+  try {
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    const user = await User.findById(decoded.userId).select('-password');
+    user.bgImage = bgImage;
+    await user.save();
+    res.status(200).json({ message: 'Profile image updated successfully' });
+  }
+  catch (error) {
+    res.status(401).json({ message: 'Token verification failed' });
+  }
+});
 
 module.exports = router;

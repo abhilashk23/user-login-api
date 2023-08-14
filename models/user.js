@@ -6,6 +6,13 @@ const userSchema = new mongoose.Schema({
   email: String,
   password: String,
   profileImage: String, // Store the image filename
+  bgImage: String,
+  links: [
+    {
+      title: String,
+      url: String,
+    },
+  ]
 });
 
 const User = mongoose.model('User', userSchema);
