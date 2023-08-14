@@ -8,7 +8,7 @@ const cors = require('cors');
 const router = express.Router();
 router.use(cors({
   origin: 'http://localhost:3000',
-  methods: 'GET,POST',
+  methods: 'GET,POST,DELETE',
   credentials: true,
 }));
 
@@ -132,8 +132,9 @@ router.post('/updateBg', upload.single('bgImage'), async (req, res) => {
 });
 
 /* Removing Bg image */
-router.delete('/removeBg', async (req, res) => {
+router.post('/removeBg', async (req, res) => {
   const token = req.body.token;
+  console.log(token);
   try{
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
     const user = await User.findById(decoded.userId).select('-password');
@@ -143,11 +144,12 @@ router.delete('/removeBg', async (req, res) => {
   }
   catch (error) {
     res.status(401).json({ message: 'Token verification failed' });
+    console.log(error);
   }
 });
 
 /* Removing profile image */
-router.delete('/removeProfile', async (req, res) => {
+router.post('/removeProfile', async (req, res) => {
   const token = req.body.token;
   try{
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
@@ -158,6 +160,7 @@ router.delete('/removeProfile', async (req, res) => {
   }
   catch (error) {
     res.status(401).json({ message: 'Token verification failed' });
+    console.log(error);
   }
 });
 
