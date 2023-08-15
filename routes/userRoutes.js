@@ -164,4 +164,26 @@ router.post('/removeProfile', async (req, res) => {
   }
 });
 
+/* Delete link */
+router.post('/delLink', async (req, res) => {
+  const { token, title} = req.body;
+  try{
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    const user = await User.findById(decoded.userId).select('-password');
+    var del_link = {}
+    for(let i =0; i<user.links.length; i++){
+      if(user.links[i].title === title){
+        user.links.splice(i, 1);
+      }
+    }
+    await user.save();
+    res.status(200).json({ message: 'Link removed successfully' });
+  }
+  catch (error){
+    res.status(401).json({ message: 'Token verification failed' });
+    console.log(error);
+  }
+})
+
+
 module.exports = router;
