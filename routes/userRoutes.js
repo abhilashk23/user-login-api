@@ -32,6 +32,10 @@ router.post('/register', upload.single('profileImage'), async (req, res) => {
     if (existingUser) {
       return res.status(400).json({ message: 'Email already exists' });
     }
+    const existingUser2 = await User.findOne({ username });
+    if (existingUser2) {
+      return res.status(400).json({ message: 'Username in use!' });
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({
@@ -135,7 +139,7 @@ router.post('/updateBg', upload.single('bgImage'), async (req, res) => {
 router.post('/removeBg', async (req, res) => {
   const token = req.body.token;
   console.log(token);
-  try{
+  try {
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
     const user = await User.findById(decoded.userId).select('-password');
     user.bgImage = "";
@@ -151,7 +155,7 @@ router.post('/removeBg', async (req, res) => {
 /* Removing profile image */
 router.post('/removeProfile', async (req, res) => {
   const token = req.body.token;
-  try{
+  try {
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
     const user = await User.findById(decoded.userId).select('-password');
     user.profileImage = "";
@@ -166,21 +170,70 @@ router.post('/removeProfile', async (req, res) => {
 
 /* Delete link */
 router.post('/delLink', async (req, res) => {
-  const { token, title} = req.body;
-  try{
+  const { token, title } = req.body;
+  try {
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
     const user = await User.findById(decoded.userId).select('-password');
-    var del_link = {}
-    for(let i =0; i<user.links.length; i++){
-      if(user.links[i].title === title){
-        user.links.splice(i, 1);
+    for (let i = 0; i < user.links.length; i++) {
+      if (user.links[i].title === title) {
+        await user.links.splice(i, 1);
       }
     }
     await user.save();
     res.status(200).json({ message: 'Link removed successfully' });
   }
-  catch (error){
+  catch (error) {
     res.status(401).json({ message: 'Token verification failed' });
+    console.log(error);
+  }
+});
+
+/* Username update */
+router.post('/updateUsername', async (req, res) => {
+  const { token, newUsername } = req.body;
+  try {
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    const user = await User.findById(decoded.userId).select('-password');
+    const existingUser3 = await User.findOne({ username: newUsername });
+    if (existingUser3) {
+      return res.status(400).json({ message: 'Username in use!' });
+    }
+    user.username = newUsername;
+    await user.save();
+
+    res.status(200).json({ message: "User updated successfully" });
+  }
+  catch (error) {
+    console.log(error);
+  }
+});
+
+/* Password update */
+router.post('/passwordUpdate', async (req, res) => {
+  const { token, oldPass, newPass, confNewPass } = req.body;
+  try {
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    const user = await User.findById(decoded.userId);
+
+    const isPasswordMatch = await bcrypt.compare(oldPass, user.password);
+    if (!isPasswordMatch) {
+      return res.status(400).json({ message: 'Old password not same' });
+    }
+
+    if (newPass !== confNewPass) {
+      return res.status(400).json({ message: 'Passwords don\'t match' });
+    }
+    
+    const newPassMatch = await bcrypt.compare(newPass, user.password);
+    if(newPassMatch){
+      return res.status(400).json({ message: 'New Password can\'t be same as old' });
+    }
+    user.password = await bcrypt.hash(newPass, 10);
+    await user.save();
+    res.status(200).json({message: 'Password updated'});
+
+  }
+  catch (error) {
     console.log(error);
   }
 })
