@@ -223,20 +223,47 @@ router.post('/passwordUpdate', async (req, res) => {
     if (newPass !== confNewPass) {
       return res.status(400).json({ message: 'Passwords don\'t match' });
     }
-    
+
     const newPassMatch = await bcrypt.compare(newPass, user.password);
-    if(newPassMatch){
+    if (newPassMatch) {
       return res.status(400).json({ message: 'New Password can\'t be same as old' });
     }
     user.password = await bcrypt.hash(newPass, 10);
     await user.save();
-    res.status(200).json({message: 'Password updated'});
+    res.status(200).json({ message: 'Password updated' });
 
   }
   catch (error) {
     console.log(error);
   }
-})
+});
+
+
+/* Allow user to search a user and view its profile */
+router.post('/searchUser', async (req, res) => {
+  const { username } = req.body;
+  try {
+    const searchedUser = await User.findOne({ username });
+    if(searchedUser){
+      const result = {
+        'name' : searchedUser.name,
+        'email' : searchedUser.email,
+        'username' : searchedUser.username,
+        'bgImage': searchedUser.bgImage,
+        'profileImage': searchedUser.profileImage,
+        'links': searchedUser.links
+      };
+
+      res.status(200).json(result);
+    }
+    else{
+      res.status(400).json({message: "No user found with that username"});
+    }
+  }
+  catch (error) {
+    console.log(error);
+  }
+});
 
 
 module.exports = router;
