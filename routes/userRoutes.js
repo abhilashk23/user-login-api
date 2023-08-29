@@ -253,7 +253,6 @@ router.post('/searchUser', async (req, res) => {
         'profileImage': searchedUser.profileImage,
         'links': searchedUser.links
       };
-
       res.status(200).json(result);
     }
     else{
