@@ -14,7 +14,19 @@ I am using the following stack for backend:
 
 - Git clone to your machine
   ``` console
-  
   git clone https://github.com/abhilashk23/user-login-api.git
-  
+  ```
+- Then install the libraries using npm
+  ``` console
+  npm install
+  ```
+- Install nodejs, nodemon to run the app.js file
+  ```console
+  npm install nodejs nodemon
+  ```
+- Create .env file to store environment variables
+
+- To run the app.js file
+  ```console
+  nodemon app.js
   ```
