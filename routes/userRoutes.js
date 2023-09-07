@@ -6,11 +6,11 @@ const User = require('../models/user');
 const cors = require('cors');
 
 const router = express.Router();
-router.use(cors({
-  origin: 'https://mern-frontend-user.vercel.app',
-  methods: 'GET,POST,DELETE',
-  credentials: true,
-}));
+// router.use(cors({
+//   origin: 'https://mern-frontend-user.vercel.app',
+//   methods: 'GET,POST,DELETE',
+//   credentials: true,
+// }));
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
