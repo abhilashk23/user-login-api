@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const User = require('../models/user');
 const cors = require('cors');
 
 const router = express.Router();
@@ -190,7 +190,7 @@ router.post('/delLink', async (req, res) => {
 
 /* Username update */
 router.post('/updateUsername', async (req, res) => {
-  const { token, newUsername } = req.body;
+  const { token, newUsername, newEmail } = req.body;
   try {
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
     const user = await User.findById(decoded.userId).select('-password');
@@ -199,6 +199,7 @@ router.post('/updateUsername', async (req, res) => {
       return res.status(400).json({ message: 'Username in use!' });
     }
     user.username = newUsername;
+    user.email = newEmail;
     await user.save();
 
     res.status(200).json({ message: "User updated successfully" });
@@ -263,6 +264,7 @@ router.post('/searchUser', async (req, res) => {
     console.log(error);
   }
 });
+
 
 
 module.exports = router;
