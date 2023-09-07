@@ -20,7 +20,7 @@ mongoose.connect(db, {
 });
 
 app.use(cors({
-    origin: 'http://localhost:3000', 
+    origin: 'https://mern-frontend-user.vercel.app', 
     methods: 'GET,POST,DELETE',
     credentials: true,
   }));
