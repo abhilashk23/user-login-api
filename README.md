@@ -30,3 +30,7 @@ I am using the following stack for backend:
   ```console
   nodemon app.js
   ```
+
+
+## Storage For API
+The API uses AWS S3 for storing file files.
