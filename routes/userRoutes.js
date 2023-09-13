@@ -3,25 +3,70 @@ const multer = require('multer');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const cors = require('cors');
+const AWS = require('aws-sdk');
+const multerS3 = require('multer-s3');
+require('dotenv').config();
 
+AWS.config.update({
+  accessKeyId: process.env.ACCESS_KEY,
+  secretAccessKey: process.env.SECRET_ACCESS_KEY,
+  region: 'ap-south-1'
+});
 const router = express.Router();
-// router.use(cors({
-//   origin: 'https://mern-frontend-user.vercel.app',
-//   methods: 'GET,POST,DELETE',
-//   credentials: true,
-// }));
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);
-  },
+
+
+const s3 = new AWS.S3();
+
+
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, 'uploads/');
+//   },
+//   filename: (req, file, cb) => {
+//     cb(null, Date.now() + '-' + file.originalname);
+//   },
+// });
+
+//const upload = multer({ storage: storage });
+
+const upload = multer({
+  storage: multerS3({
+    s3: s3,
+    bucket: 'node-api-linkpalace-bucket',
+    acl: 'public-read', // Set appropriate ACL
+    metadata: function (req, file, cb) {
+      cb(null, { fieldName: file.fieldname });
+    },
+    key: function (req, file, cb) {
+      const folder = 'profileImage'; // Specify your desired folder name
+      const filename = Date.now().toString() + '-' + file.originalname;
+      const key = folder + '/' + filename; // Include the folder in the key
+      cb(null, key);
+    },
+    contentType : multerS3.AUTO_CONTENT_TYPE
+  }),
 });
 
-const upload = multer({ storage: storage });
+/* BG image upload */
+const uploadbg = multer({
+  storage: multerS3({
+    s3: s3,
+    bucket: 'node-api-linkpalace-bucket',
+    acl: 'public-read', // Set appropriate ACL
+    metadata: function (req, file, cb) {
+      cb(null, { fieldName: file.fieldname });
+    },
+    key: function (req, file, cb) {
+      const folder = 'bgImage'; // Specify your desired folder name
+      const filename = Date.now().toString() + '-' + file.originalname;
+      const key = folder + '/' + filename; // Include the folder in the key
+      cb(null, key);
+    },
+    contentType : multerS3.AUTO_CONTENT_TYPE
+  }),
+});
+
 
 
 /* Register Path */
@@ -43,9 +88,8 @@ router.post('/register', upload.single('profileImage'), async (req, res) => {
       username,
       email,
       password: hashedPassword,
-      profileImage: req.file ? req.file.filename : null,
+      profileImage: req.file ? req.file.location : null,
     });
-
     await newUser.save();
 
     res.status(201).json({ message: 'User registered successfully' });
@@ -91,7 +135,7 @@ router.post('/verifyToken', async (req, res) => {
 /* Update profile Image */
 router.post('/updateProfile', upload.single('profileImage'), async (req, res) => {
   const token = req.body.token;
-  const profileImage = req.file ? req.file.filename : null;
+  const profileImage = req.file ? req.file.location : null;
   try {
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
     const user = await User.findById(decoded.userId).select('-password');
@@ -120,15 +164,15 @@ router.post('/addLinks', async (req, res) => {
 });
 
 /* Update backgroud image */
-router.post('/updateBg', upload.single('bgImage'), async (req, res) => {
+router.post('/updateBg', uploadbg.single('bgImage'), async (req, res) => {
   const token = req.body.token;
-  const bgImage = req.file ? req.file.filename : null;
+  const bgImage = req.file ? req.file.location : null;
   try {
     const decoded = jwt.verify(token, process.env.SECRET_KEY);
     const user = await User.findById(decoded.userId).select('-password');
     user.bgImage = bgImage;
     await user.save();
-    res.status(200).json({ message: 'Profile image updated successfully' });
+    res.status(200).json({ message: 'Background image updated successfully' });
   }
   catch (error) {
     res.status(401).json({ message: 'Token verification failed' });
