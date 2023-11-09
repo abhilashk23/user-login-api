@@ -33,4 +33,4 @@ I am using the following stack for backend:
 
 
 ## Storage For API
-The API uses AWS S3 for storing file files.
+The API uses AWS S3 for storing image files.
