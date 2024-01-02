@@ -8,7 +8,9 @@ I am using the following stack for backend:
 - **ExpressJS**
 - **MongoDB**
 
-#### The API is hosted on Render. 
+#### The API is hosted on Render
+- Server Specs:
+  0.1 CPU and 512 MB RAM
 
 ## To run the API on local machine
 
