@@ -13,7 +13,7 @@ app.use(cors({
 }));
 
 
-const db = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.CLUSTER}.mongodb.net/${process.env.DB}?retryWrites=true&w=majority`
+const db = `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.CLUSTER}.mongodb.net/${process.env.DB}?retryWrites=true&w=majority`
 mongoose.connect(db, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
