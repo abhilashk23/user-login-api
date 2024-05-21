@@ -7,7 +7,7 @@ require('dotenv').config();
 const app = express();
 const PORT = 5000;
 app.use(cors({
-  // origin: ['https://mern-frontend-user.vercel.app', 'http://localhost:3000', 'https://linkpalace.vercel.app'],
+  origin: ['https://mern-frontend-user.vercel.app', 'http://localhost:3000', 'https://linkpalace.vercel.app'],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
 }));
