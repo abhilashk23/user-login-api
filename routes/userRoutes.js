@@ -309,6 +309,22 @@ router.post('/searchUser', async (req, res) => {
   }
 });
 
+router.get('/suggestions', async (req, res) => {
+  const { query } = req.query;
+  try {
+    const users = await User.find({ username: { $regex: `^${query}`, $options: 'i' } }).limit(5);
+    const suggestions = users.map(user => ({
+      'name': user.name,
+      'username': user.username,
+      'profileImage': user.profileImage,
+    }));
+    res.status(200).json(suggestions);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 
 
 module.exports = router;
